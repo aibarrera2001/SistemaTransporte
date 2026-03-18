@@ -4,18 +4,13 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/**
- * Clase base que representa un vehículo del sistema de transporte.
- * La ruta ya no se escribe manualmente: se asigna un objeto {@link Ruta}
- * previamente registrado en el catálogo.
- */
 public class Vehiculo {
 
     // ── Atributos ────────────────────────────────────────────────────────────
     protected int    capacidadmaxima;
     protected int    tarifa1;
     private   String placa;
-    private   Ruta   ruta;          // ← ahora es un objeto Ruta, no un String
+    private   Ruta   ruta;         
     private   boolean disponible;
 
     // ── Constructor ──────────────────────────────────────────────────────────
@@ -29,7 +24,7 @@ public class Vehiculo {
         this.disponible = disponible;
     }
 
-    // ── Persistencia ─────────────────────────────────────────────────────────
+    // ── Persistencia 
     protected void guardarEnArchivo() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("vehiculos.txt", true))) {
             bw.write(toString());
@@ -40,7 +35,7 @@ public class Vehiculo {
         }
     }
 
-    // ── Getters y Setters ────────────────────────────────────────────────────
+    // ── Getters y Setters
     public int getCapacidad() { return capacidadmaxima; }
     public void setCapacidad(int capacidad) { this.capacidadmaxima = capacidad; }
 
@@ -54,7 +49,7 @@ public class Vehiculo {
 
     /**
      * Reasigna la ruta del vehículo.
-     * @param ruta
+     * @param 
      */
     public void setRuta(Ruta ruta) {
         if (ruta == null) {
@@ -66,13 +61,13 @@ public class Vehiculo {
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
-    // ── toString ─────────────────────────────────────────────────────────────
+    // ── toString 
     @Override
     public String toString() {
         return placa + ","
              + capacidadmaxima + ","
              + tarifa1 + ","
-             + ruta.getCodigoRuta() + ","          // guarda el código de la ruta
+             + ruta.getCodigoRuta() + ","          
              + ruta.getCiudadOrigen() + "-"
              + ruta.getCiudadDestino() + ","
              + disponible + ",";
