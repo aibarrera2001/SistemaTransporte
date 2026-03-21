@@ -33,6 +33,7 @@ public class Menu {
                 case 3: menuPasajeros();    break;
                 case 4: menuTickets();      break;
                 case 5: menuEstadisticas(); break;
+                case 6: menuReportes();     break;
                 case 0: System.out.println("\n👋 Saliendo del sistema TransCesar..."); break;
                 default: System.out.println("⚠ Opción no válida.");
             }
@@ -48,6 +49,7 @@ public class Menu {
         System.out.println("║  3. Gestión de Pasajeros                 ║");
         System.out.println("║  4. Venta de Tickets                     ║");
         System.out.println("║  5. Consultas y Estadísticas             ║");
+        System.out.println("║  6. Reportes                             ║");
         System.out.println("║  0. Salir                                ║");
         System.out.println("╚══════════════════════════════════════════╝");
     }
@@ -223,4 +225,91 @@ public class Menu {
             }
         }
     }
+    // ── REPORTES ──────────────────────────────────────────────
+private void menuReportes() {
+    int op;
+    do {
+        System.out.println("\n── Reportes ──────────────────────────────");
+        System.out.println("  1. Tickets por fecha específica");
+        System.out.println("  2. Tickets por tipo de vehículo");
+        System.out.println("  3. Tickets por tipo de pasajero");
+        System.out.println("  4. Resumen del día actual");
+        System.out.println("  0. Volver");
+        op = leerEntero("Opción: ");
+        switch (op) {
+            case 1: reportePorFecha();      break;
+            case 2: reportePorVehiculo();   break;
+            case 3: reportePorPasajero();   break;
+            case 4: reporteDelDia();        break;
+        }
+    } while (op != 0);
+}
+
+private void reportePorFecha() {
+    System.out.print("Ingresa la fecha (YYYY-MM-DD): ");
+    String fechaStr = sc.nextLine().trim();
+    java.time.LocalDate fecha;
+    try {
+        fecha = java.time.LocalDate.parse(fechaStr);
+    } catch (Exception e) {
+        System.out.println("⚠ Formato de fecha inválido."); return;
+    }
+    boolean encontrado = false;
+    System.out.println("\n── Tickets para " + fecha + " ──────────────────");
+    for (Ticket t : ts.listarTickets()) {
+        if (t.getFechaCompra().equals(fecha)) {
+            t.imprimirDetalle();
+            encontrado = true;
+        }
+    }
+    if (!encontrado) System.out.println("No hay tickets para esa fecha.");
+}
+
+private void reportePorVehiculo() {
+    System.out.print("Tipo de vehículo (Buseta/MicroBus/Bus): ");
+    String tipo = sc.nextLine().trim();
+    boolean encontrado = false;
+    System.out.println("\n── Tickets con vehículo tipo " + tipo + " ─────────");
+    for (Ticket t : ts.listarTickets()) {
+        if (t.getVehiculo().getClass().getSimpleName().equalsIgnoreCase(tipo)) {
+            t.imprimirDetalle();
+            encontrado = true;
+        }
+    }
+    if (!encontrado) System.out.println("No hay tickets para ese tipo de vehículo.");
+}
+
+private void reportePorPasajero() {
+    System.out.print("Tipo de pasajero (Regular/Estudiante/Adulto Mayor): ");
+    String tipo = sc.nextLine().trim();
+    boolean encontrado = false;
+    System.out.println("\n── Tickets de pasajeros tipo " + tipo + " ─────────");
+    for (Ticket t : ts.listarTickets()) {
+        if (t.getPasajero().getTipo().equalsIgnoreCase(tipo)) {
+            t.imprimirDetalle();
+            encontrado = true;
+        }
+    }
+    if (!encontrado) System.out.println("No hay tickets para ese tipo de pasajero.");
+}
+
+private void reporteDelDia() {
+    java.time.LocalDate hoy = java.time.LocalDate.now();
+    int total = 0;
+    double recaudado = 0;
+    System.out.println("\n── Resumen del día " + hoy + " ──────────────────");
+    for (Ticket t : ts.listarTickets()) {
+        if (t.getFechaCompra().equals(hoy)) {
+            t.imprimirDetalle();
+            total++;
+            recaudado += t.getValorFinal();
+        }
+    }
+    System.out.println("╔══════════════════════════════════════════╗");
+    System.out.printf( "║  Tickets vendidos hoy : %-17d║%n", total);
+    System.out.printf( "║  Total recaudado hoy  : $%-16d║%n", (int) recaudado);
+    System.out.println("╚══════════════════════════════════════════╝");
+}
+    
+ 
 }
