@@ -84,4 +84,21 @@ public class PasajeroEstudiante extends Pasajero {
         System.out.println("Estudiante: " + nombre);
     }
 }
+
+public class PasajeroAdultoMayor extends Pasajero {
+
+    public PasajeroAdultoMayor(String cedula, String nombre) {
+        super(cedula, nombre);
+    }
+
+    @Override
+    public double calcularDescuento() {
+        return 0.30;
+    }
+
+    @Override
+    public void imprimirDetalle() {
+        System.out.println("Adulto Mayor: " + nombre);
+    }
+}
 }
