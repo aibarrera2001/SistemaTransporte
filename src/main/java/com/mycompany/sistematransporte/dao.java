@@ -23,4 +23,15 @@ public class PasajeroDAO {
         }
     }
 }
+
+public class ConductorDAO {
+
+    public void guardar(Conductor conductor) {
+        try (FileWriter fw = new FileWriter("conductores.txt", true)) {
+            fw.write(conductor.getCedula() + ";" + conductor.getNombre() + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 }
