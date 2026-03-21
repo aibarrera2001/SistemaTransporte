@@ -34,4 +34,17 @@ public class ConductorDAO {
         }
     }
 }
+
+public class TicketDAO {
+
+    public void guardar(Ticket ticket) {
+        try (FileWriter fw = new FileWriter("tickets.txt", true)) {
+            fw.write(ticket.getPasajero().getNombre() + ";" +
+                     ticket.getVehiculo().getTarifaBase() + ";" +
+                     ticket.calcularTotal() + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 }
