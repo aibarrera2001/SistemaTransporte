@@ -1,60 +1,52 @@
-package main.java.Model;
+package Model;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 
-/**
- * Clase que representa una Reserva en el sistema.
- * Implementa Serializable para permitir la persistencia de objetos.
- */
-public class Reserva implements Serializable {
-    
-    // Identificador único para la serialización
-    private static final long serialVersionUID = 1L;
+public class Reserva implements Imprimible {
+
+    public enum EstadoReserva { ACTIVA, CONVERTIDA, CANCELADA }
 
     private String codigo;
-    private String pasajero;
-    private String vehiculo;
+    private Pasajero pasajero;
+    private Vehiculo vehiculo;
     private LocalDate fechaCreacion;
     private LocalDate fechaViaje;
     private EstadoReserva estado;
 
-    // Constructor vacío (Recomendado para frameworks y serialización)
-    public Reserva() {}
-
-    // Constructor con parámetros
-    public Reserva(String codigo, String pasajero, String vehiculo, 
-                   LocalDate fechaCreacion, LocalDate fechaViaje, EstadoReserva estado) {
-        this.codigo = codigo;
-        this.pasajero = pasajero;
-        this.vehiculo = vehiculo;
-        this.fechaCreacion = fechaCreacion;
-        this.fechaViaje = fechaViaje;
-        this.estado = estado;
+    public Reserva(String codigo, Pasajero pasajero, Vehiculo vehiculo,
+                   LocalDate fechaViaje) {
+        this.codigo        = codigo;
+        this.pasajero      = pasajero;
+        this.vehiculo      = vehiculo;
+        this.fechaCreacion = LocalDate.now();
+        this.fechaViaje    = fechaViaje;
+        this.estado        = EstadoReserva.ACTIVA;
     }
 
-    // --- Getters y Setters ---
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
-
-    public String getPasajero() { return pasajero; }
-    public void setPasajero(String pasajero) { this.pasajero = pasajero; }
-
-    public String getVehiculo() { return vehiculo; }
-    public void setVehiculo(String vehiculo) { this.vehiculo = vehiculo; }
-
-    public LocalDate getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(LocalDate fechaCreacion) { this.fechaCreacion = fechaCreacion; }
-
-    public LocalDate getFechaViaje() { return fechaViaje; }
-    public void setFechaViaje(LocalDate fechaViaje) { this.fechaViaje = fechaViaje; }
-
-    public EstadoReserva getEstado() { return estado; }
-    public void setEstado(EstadoReserva estado) { this.estado = estado; }
+    public boolean estaVencida() {
+        return estado == EstadoReserva.ACTIVA &&
+               fechaCreacion.isBefore(LocalDate.now().minusDays(1));
+    }
 
     @Override
-    public String toString() {
-        return codigo + "|" + pasajero + "|" + vehiculo + "|" + 
-               fechaCreacion + "|" + fechaViaje + "|" + estado;
+    public void imprimirDetalle() {
+        System.out.println("┌─ RESERVA ────────────────────────────────");
+        System.out.println("│ Código   : " + codigo);
+        System.out.println("│ Pasajero : " + pasajero.getNombre());
+        System.out.println("│ Vehículo : " + vehiculo.getPlaca());
+        System.out.println("│ Creación : " + fechaCreacion);
+        System.out.println("│ Viaje    : " + fechaViaje);
+        System.out.println("│ Estado   : " + estado);
+        System.out.println("└──────────────────────────────────────────");
     }
+
+    public String getCodigo()          { return codigo; }
+    public Pasajero getPasajero()      { return pasajero; }
+    public Vehiculo getVehiculo()      { return vehiculo; }
+    public LocalDate getFechaCreacion(){ return fechaCreacion; }
+    public LocalDate getFechaViaje()   { return fechaViaje; }
+    public EstadoReserva getEstado()   { return estado; }
+
+    public void setEstado(EstadoReserva estado) { this.estado = estado; }
+    public void setFechaCreacion(LocalDate f)   { this.fechaCreacion = f; }
 }
