@@ -8,6 +8,19 @@ package Model;
  *
  * @author Andrés
  */
-public class PasajeroRegular {
-    
+
+
+public class PasajeroRegular extends Pasajero {
+
+    public PasajeroRegular(String cedula, String nombre) {
+        super(cedula, nombre);
+    }
+
+    @Override public double calcularDescuento() { return 0.0; }
+    @Override public String getTipo()           { return "Regular"; }
+
+    @Override
+    public void imprimirDetalle() {
+        System.out.println("│ Regular      | " + cedula + " | " + nombre + " | Descuento: 0%");
+    }
 }

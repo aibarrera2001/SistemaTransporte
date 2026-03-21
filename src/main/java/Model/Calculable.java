@@ -8,6 +8,6 @@ package Model;
  *
  * @author Andrés
  */
-public class Calculable {
-    
+public interface Calculable {
+    double calcularTotal();
 }
