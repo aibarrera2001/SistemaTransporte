@@ -14,6 +14,7 @@ import java.time.LocalDate;
 
 
 
+
 public class Ticket implements Imprimible, Calculable {
 
     private Pasajero  pasajero;
@@ -61,8 +62,4 @@ public class Ticket implements Imprimible, Calculable {
 
     public void setValorFinal(double valorFinal) { this.valorFinal  = valorFinal; }
     public void setFechaCompra(LocalDate fecha)  { this.fechaCompra = fecha; }
-    
-    public LocalDate getFecha() {
-    return fecha;
-}
 }
