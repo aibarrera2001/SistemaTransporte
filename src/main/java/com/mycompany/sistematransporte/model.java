@@ -67,4 +67,21 @@ public abstract class Pasajero extends Persona {
 
     public abstract double calcularDescuento();
 }
+
+public class PasajeroEstudiante extends Pasajero {
+
+    public PasajeroEstudiante(String cedula, String nombre) {
+        super(cedula, nombre);
+    }
+
+    @Override
+    public double calcularDescuento() {
+        return 0.15;
+    }
+
+    @Override
+    public void imprimirDetalle() {
+        System.out.println("Estudiante: " + nombre);
+    }
+}
 }
