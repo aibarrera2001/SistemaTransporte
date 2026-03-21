@@ -40,23 +40,13 @@ public class Reserva implements Imprimible {
         System.out.println("└──────────────────────────────────────────");
     }
 
-    public String getCodigo()          { return codigo; }
-    public Pasajero getPasajero()      { return pasajero; }
-    public Vehiculo getVehiculo()      { return vehiculo; }
-    public LocalDate getFechaCreacion(){ return fechaCreacion; }
-    public LocalDate getFechaViaje()   { return fechaViaje; }
-    public EstadoReserva getEstado()   { return estado; }
+    public String getCodigo()           { return codigo; }
+    public Pasajero getPasajero()       { return pasajero; }
+    public Vehiculo getVehiculo()       { return vehiculo; }
+    public LocalDate getFechaCreacion() { return fechaCreacion; }
+    public LocalDate getFechaViaje()    { return fechaViaje; }
+    public EstadoReserva getEstado()    { return estado; }
 
-    public void setEstado(EstadoReserva estado) { this.estado = estado; }
-    public void setFechaCreacion(LocalDate f)   { this.fechaCreacion = f; }
-    
-private LocalDateTime fechaCreacion;
-
-public LocalDateTime getFechaCreacion() {
-    return fechaCreacion;
-}
-
-public void setFechaCreacion(LocalDateTime fechaCreacion) {
-    this.fechaCreacion = fechaCreacion;
-}
+    public void setEstado(EstadoReserva estado)  { this.estado = estado; }
+    public void setFechaCreacion(LocalDate f)    { this.fechaCreacion = f; }
 }
