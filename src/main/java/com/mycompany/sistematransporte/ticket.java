@@ -5,6 +5,8 @@
 package com.mycompany.sistematransporte;
 import dao.*;
 import model.*;
+import dao.TicketDAO;
+import model.*;
 /**
  *
  * @author jose
@@ -30,6 +32,28 @@ public class PersonaService {
 
         conductorDAO.guardar(conductor);
         System.out.println("✅ Conductor registrado");
+    }
+}
+
+public class TicketService {
+
+    private TicketDAO ticketDAO = new TicketDAO();
+
+    public void venderTicket(Pasajero pasajero, Vehiculo vehiculo, String origen, String destino) {
+
+        if (!vehiculo.hayCupos()) {
+            System.out.println("❌ No hay cupos disponibles");
+            return;
+        }
+
+        Ticket ticket = new Ticket(pasajero, vehiculo, origen, destino);
+
+        vehiculo.ocuparCupo();
+
+        ticketDAO.guardar(ticket);
+
+        System.out.println("✅ Ticket vendido correctamente");
+        ticket.imprimirDetalle();
     }
 }
 }
