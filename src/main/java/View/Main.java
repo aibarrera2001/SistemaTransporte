@@ -8,9 +8,12 @@ package View;
  *
  * @author Andrés
  */
-public class Main {
 
+
+public class Main {
     public static void main(String[] args) {
-       
+        System.out.println("Iniciando TransCesar S.A.S...");
+        Menu menu = new Menu();
+        menu.iniciar();
     }
-}
+} 
