@@ -1,9 +1,4 @@
-
-
-ABC-123,45,12000,R001,Bogota-Medellin,true,
-XYZ-789,19,8000,R002,Bogota-Cali,false,
-DEF-456,12,6000,R002,Bogota-Cali,true,
-ABC-123,45,12000,R001,Bogota-Medellin,true,
-XYZ-789,19,8000,R002,Bogota-Cali,false,
-DEF-456,12,6000,R002,Bogota-Cali,true,
-Buseta;TXL;la paz;0;true
+Buseta;TXL;;0;true;
+Buseta;LLL;;0;true;
+Bus;TTT;;1;true;
+MicroBus;ZZZ;20;0;true;100

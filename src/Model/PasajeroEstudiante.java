@@ -1,26 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Model;
 
-/**
- *
- * @author Andrés
- */
-
+import java.time.LocalDate;
 
 public class PasajeroEstudiante extends Pasajero {
 
-    public PasajeroEstudiante(String cedula, String nombre) {
-        super(cedula, nombre);
+    public PasajeroEstudiante(String cedula, String nombre, LocalDate fechaNacimiento) {
+        super(cedula, nombre, fechaNacimiento);
     }
 
-    @Override public double calcularDescuento() { return 0.15; }
-    @Override public String getTipo()           { return "Estudiante"; }
+    public double aplicarDescuento(double tarifa) { return tarifa * 0.80; }
+    @Override public String getTipo() { return "Estudiante"; }
 
     @Override
     public void imprimirDetalle() {
-        System.out.println("│ Estudiante   | " + cedula + " | " + nombre + " | Descuento: 15%");
+        System.out.println("┌─ PASAJERO ESTUDIANTE ────────────────────");
+        System.out.println("│ Cedula : " + cedula);
+        System.out.println("│ Nombre : " + nombre);
+        System.out.println("│ Edad   : " + getEdad() + " años");
+        System.out.println("│ Tipo   : Estudiante (20% descuento)");
+        System.out.println("└──────────────────────────────────────────");
     }
 }

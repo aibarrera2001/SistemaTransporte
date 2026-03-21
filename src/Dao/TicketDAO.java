@@ -4,7 +4,9 @@
  */
 package Dao;
 
-import Model.*;
+import Model.Pasajero;
+import Model.Ticket;
+import Model.Vehiculo;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -1,51 +1,44 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Service;
 
 import Dao.VehiculoDAO;
 import Model.*;
 import java.util.List;
 
-/**
- *
- * @author Andrés
- */
-
-
 public class VehiculoService {
 
-    private List<Vehiculo> vehiculos;
+    private List<Vehiculo>    vehiculos;
     private final VehiculoDAO dao = new VehiculoDAO();
 
-    public VehiculoService() {
-        this.vehiculos = dao.cargarTodos();
+    // Constructor actualizado: necesita rutas y conductores para reconstruir desde archivo
+    public VehiculoService(List<Ruta> rutas, List<Conductor> conductores) {
+        this.vehiculos = dao.cargarTodos(rutas, conductores);
     }
 
     public boolean registrarVehiculo(Vehiculo v) {
         for (Vehiculo ex : vehiculos)
             if (ex.getPlaca().equalsIgnoreCase(v.getPlaca())) {
-                System.out.println("⚠ Ya existe un vehículo con la placa " + v.getPlaca());
+                System.out.println("  Ya existe un vehiculo con la placa " + v.getPlaca());
                 return false;
             }
         vehiculos.add(v);
         dao.guardar(v);
-        System.out.println("✔ Vehículo registrado correctamente.");
+        System.out.println("  Vehiculo registrado correctamente.");
         return true;
     }
 
     public boolean asignarConductor(String placa, Conductor conductor) {
         if (!conductor.tieneLicencia()) {
-            System.out.println("⚠ El conductor no tiene licencia registrada.");
+            System.out.println("  El conductor no tiene licencia registrada.");
             return false;
         }
         Vehiculo v = buscarPorPlaca(placa);
         if (v == null) {
-            System.out.println("⚠ No se encontró vehículo con esa placa.");
+            System.out.println("  No se encontro vehiculo con esa placa.");
             return false;
         }
-        System.out.println("✔ Conductor " + conductor.getNombre() + " asignado a " + placa);
+        v.setConductor(conductor);
+        dao.guardarTodos(vehiculos);
+        System.out.println("  Conductor " + conductor.getNombre() + " asignado a " + placa);
         return true;
     }
 
@@ -56,6 +49,5 @@ public class VehiculoService {
     }
 
     public List<Vehiculo> listarVehiculos() { return vehiculos; }
-
-    public void guardarCambios() { dao.guardarTodos(vehiculos); }
+    public void guardarCambios()            { dao.guardarTodos(vehiculos); }
 }

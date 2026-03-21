@@ -20,26 +20,26 @@ public class ReservaService {
         this.vehiculoService = vs;
         this.personaService  = ps;
         this.ticketService   = ts;
-        this.dao     = new ReservaDAO();
+        this.dao      = new ReservaDAO();
         this.reservas = dao.cargarTodos(ps.listarPasajeros(), vs.listarVehiculos());
         verificarVencidas();
     }
 
     public boolean crearReserva(String cedulaPasajero, String placaVehiculo, LocalDate fechaViaje) {
         Pasajero p = personaService.buscarPasajero(cedulaPasajero);
-        if (p == null) { System.out.println("⚠ Pasajero no encontrado."); return false; }
+        if (p == null) { System.out.println("  Pasajero no encontrado."); return false; }
 
         Vehiculo v = vehiculoService.buscarPorPlaca(placaVehiculo);
-        if (v == null) { System.out.println("⚠ Vehículo no encontrado."); return false; }
+        if (v == null) { System.out.println("  Vehiculo no encontrado."); return false; }
 
-        // Validar cupos disponibles
-        long reservasActivas = reservas.stream() 
+        // Validar cupos
+        long reservasActivas = reservas.stream()
             .filter(r -> r.getVehiculo().getPlaca().equals(placaVehiculo)
                       && r.getEstado() == EstadoReserva.ACTIVA)
             .count();
         int ocupados = v.getPasajerosActuales() + (int) reservasActivas;
         if (ocupados >= v.getCapacidadMaxima()) {
-            System.out.println("⚠ No hay cupos disponibles para este vehículo.");
+            System.out.println("  No hay cupos disponibles para este vehiculo.");
             return false;
         }
 
@@ -50,15 +50,15 @@ public class ReservaService {
                        && r.getFechaViaje().equals(fechaViaje)
                        && r.getEstado() == EstadoReserva.ACTIVA);
         if (existe) {
-            System.out.println("⚠ El pasajero ya tiene una reserva activa para ese vehículo en esa fecha.");
+            System.out.println("  El pasajero ya tiene una reserva activa para ese vehiculo en esa fecha.");
             return false;
         }
 
         String codigo = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        Reserva r = new Reserva(codigo, p, v, fechaViaje);
-        reservas.add(r);
-        dao.guardar(r);
-        System.out.println("✔ Reserva creada. Código: " + codigo);
+        Reserva res = new Reserva(codigo, p, v, fechaViaje);
+        reservas.add(res);
+        dao.guardar(res);
+        System.out.println("  Reserva creada. Codigo: " + codigo);
         return true;
     }
 
@@ -67,32 +67,40 @@ public class ReservaService {
             if (r.getCodigo().equals(codigo) && r.getEstado() == EstadoReserva.ACTIVA) {
                 r.setEstado(EstadoReserva.CANCELADA);
                 dao.guardarTodos(reservas);
-                System.out.println("✔ Reserva cancelada.");
+                System.out.println("  Reserva cancelada.");
                 return true;
             }
         }
-        System.out.println("⚠ Reserva no encontrada o ya no está activa.");
+        System.out.println("  Reserva no encontrada o ya no esta activa.");
         return false;
     }
 
     public boolean convertirEnTicket(String codigo) {
         for (Reserva r : reservas) {
             if (r.getCodigo().equals(codigo) && r.getEstado() == EstadoReserva.ACTIVA) {
+                // getRuta() devuelve objeto Ruta — usamos origen y destino del objeto
+                String origen  = r.getVehiculo().getRuta() != null
+                        ? r.getVehiculo().getRuta().getCiudadOrigen()
+                        : "Sin origen";
+                String destino = r.getVehiculo().getRuta() != null
+                        ? r.getVehiculo().getRuta().getCiudadDestino()
+                        : "Sin destino";
+
                 boolean vendido = ticketService.venderTicket(
                     r.getPasajero().getCedula(),
                     r.getVehiculo().getPlaca(),
-                    r.getVehiculo().getRuta(),
-                    r.getFechaViaje().toString()
+                    origen,
+                    destino
                 );
                 if (vendido) {
                     r.setEstado(EstadoReserva.CONVERTIDA);
                     dao.guardarTodos(reservas);
-                    System.out.println("✔ Reserva convertida en ticket.");
+                    System.out.println("  Reserva convertida en ticket.");
                     return true;
                 }
             }
         }
-        System.out.println("⚠ No se pudo convertir la reserva.");
+        System.out.println("  No se pudo convertir la reserva.");
         return false;
     }
 

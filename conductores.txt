@@ -1,0 +1,2 @@
+100;pedro;LOC1;B2
+400;alfonso;los;C2
