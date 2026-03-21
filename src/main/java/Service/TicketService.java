@@ -3,18 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Service;
+
+
 import Dao.TicketDAO;
 import Model.*;
-import java.util.*;
-import dao.TicketDAO;
-import model.*;
 import java.time.LocalDate;
 import java.util.*;
+
 /**
  *
  * @author Andrés
  */
-
 
 
 public class TicketService implements Calculable {
@@ -23,6 +22,15 @@ public class TicketService implements Calculable {
     private final TicketDAO       dao;
     private final VehiculoService vehiculoService;
     private final PersonaService  personaService;
+
+    private static final List<LocalDate> FESTIVOS = Arrays.asList(
+        LocalDate.of(LocalDate.now().getYear(), 1,  1),
+        LocalDate.of(LocalDate.now().getYear(), 5,  1),
+        LocalDate.of(LocalDate.now().getYear(), 7,  20),
+        LocalDate.of(LocalDate.now().getYear(), 8,  7),
+        LocalDate.of(LocalDate.now().getYear(), 12, 8),
+        LocalDate.of(LocalDate.now().getYear(), 12, 25)
+    );
 
     public TicketService(VehiculoService vs, PersonaService ps) {
         this.vehiculoService = vs;
@@ -35,10 +43,32 @@ public class TicketService implements Calculable {
                                 String origen, String destino) {
         Pasajero p = personaService.buscarPasajero(cedulaPasajero);
         if (p == null) { System.out.println("⚠ Pasajero no encontrado."); return false; }
+
         Vehiculo v = vehiculoService.buscarPorPlaca(placaVehiculo);
         if (v == null) { System.out.println("⚠ Vehículo no encontrado."); return false; }
+
         if (!v.tieneCupos()) { System.out.println("⚠ El vehículo está lleno."); return false; }
+
+        // Validar máximo 3 tickets por día
+        LocalDate hoy = LocalDate.now();
+        long ticketsHoy = tickets.stream()
+            .filter(t -> t.getPasajero().getCedula().equals(cedulaPasajero)
+                      && t.getFechaCompra().equals(hoy))
+            .count();
+        if (ticketsHoy >= 3) {
+            System.out.println("⚠ El pasajero ya tiene " + ticketsHoy + " tickets hoy. No puede comprar más.");
+            return false;
+        }
+
         Ticket t = new Ticket(p, v, origen, destino);
+
+        // Recargo por festivo 20%
+        if (FESTIVOS.contains(hoy)) {
+            double valorFestivo = t.getValorFinal() * 1.20;
+            t.setValorFinal(valorFestivo);
+            System.out.println("📅 Día festivo — tarifa con recargo del 20%");
+        }
+
         v.agregarPasajero();
         vehiculoService.guardarCambios();
         tickets.add(t);
@@ -79,69 +109,4 @@ public class TicketService implements Calculable {
             if (e.getValue() > max) { max = e.getValue(); mejor = e.getKey(); }
         return mejor;
     }
-    
-public class TicketServicio {
-
-    private TicketDAO ticketDAO = new TicketDAO();
-
-    // Simulación de tickets en memoria (puedes luego cargar desde archivo)
-    private List<Ticket> tickets = new ArrayList<>();
-
-    // 📅 Lista de festivos (ejemplo Colombia)
-    private static final Set<LocalDate> FESTIVOS = Set.of(
-            LocalDate.of(2026, 1, 1),   // Año nuevo
-            LocalDate.of(2026, 5, 1),   // Día del trabajo
-            LocalDate.of(2026, 7, 20),  // Independencia
-            LocalDate.of(2026, 8, 7),   // Batalla de Boyacá
-            LocalDate.of(2026, 12, 8),  // Inmaculada
-            LocalDate.of(2026, 12, 25)  // Navidad
-    );
-
-    public void venderTicket(Pasajero pasajero, Vehiculo vehiculo, String origen, String destino) {
-
-        LocalDate hoy = LocalDate.now();
-
-        // 🔴 VALIDACIÓN 1: máximo 3 tickets por día
-        long cantidadHoy = tickets.stream()
-                .filter(t -> t.getPasajero().getCedula().equals(pasajero.getCedula())
-                        && t.getFecha().equals(hoy))
-                .count();
-
-        if (cantidadHoy >= 3) {
-            System.out.println("❌ El pasajero ya tiene 3 tickets hoy");
-            return;
-        }
-
-        // 🔴 VALIDACIÓN 2: cupos del vehículo
-        if (!vehiculo.hayCupos()) {
-            System.out.println("❌ No hay cupos disponibles");
-            return;
-        }
-
-        // 💰 Crear ticket
-        Ticket ticket = new Ticket(pasajero, vehiculo, origen, destino);
-
-        double total = ticket.calcularTotal();
-
-        // 🟡 REGLA: aumento del 20% si es festivo
-        if (FESTIVOS.contains(hoy)) {
-            total *= 1.20;
-            System.out.println("⚠️ Día festivo: se aplica recargo del 20%");
-        }
-
-        // ocupar cupo
-        vehiculo.ocuparCupo();
-
-        // guardar en memoria
-        tickets.add(ticket);
-
-        // persistencia
-        ticketDAO.guardar(ticket);
-
-        // salida
-        System.out.println("✅ Ticket vendido correctamente");
-        System.out.println("Total a pagar: $" + total);
-        ticket.imprimirDetalle();
-    }
-}
 }
