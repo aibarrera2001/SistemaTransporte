@@ -1,132 +1,124 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package main.java.Service;
-import dao.ReservaDAO;
-import model.*;
+package Service;
 
-import java.time.Duration;
+import Dao.ReservaDAO;
+import Model.*;
+import Model.Reserva.EstadoReserva;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-/**
- *
- * @author jose
- */
+
 public class ReservaService {
 
-public class ReservaServicio {
+    private List<Reserva> reservas;
+    private final ReservaDAO dao;
+    private final VehiculoService vehiculoService;
+    private final PersonaService  personaService;
+    private final TicketService   ticketService;
 
-    private ReservaDAO reservaDAO = new ReservaDAO();
-    private TicketService ticketService = new TicketService();
+    public ReservaService(VehiculoService vs, PersonaService ps, TicketService ts) {
+        this.vehiculoService = vs;
+        this.personaService  = ps;
+        this.ticketService   = ts;
+        this.dao     = new ReservaDAO();
+        this.reservas = dao.cargarTodos(ps.listarPasajeros(), vs.listarVehiculos());
+        verificarVencidas();
+    }
 
-    
-    public Reserva crearReserva(Pasajero pasajero, Vehiculo vehiculo, LocalDate fechaViaje) {
+    public boolean crearReserva(String cedulaPasajero, String placaVehiculo, LocalDate fechaViaje) {
+        Pasajero p = personaService.buscarPasajero(cedulaPasajero);
+        if (p == null) { System.out.println("⚠ Pasajero no encontrado."); return false; }
 
-        
-        long reservasActivas = reservaDAO.listar().stream()
-                .filter(r -> r.getVehiculo().equals(vehiculo))
-                .filter(r -> r.getFechaViaje().equals(fechaViaje))
-                .filter(r -> r.getEstado().equals("PENDIENTE"))
-                .count();
+        Vehiculo v = vehiculoService.buscarPorPlaca(placaVehiculo);
+        if (v == null) { System.out.println("⚠ Vehículo no encontrado."); return false; }
 
-        if (reservasActivas >= vehiculo.getCapacidad()) {
-            System.out.println("No hay cupos disponibles para este vehículo.");
-            return null;
+        // Validar cupos disponibles
+        long reservasActivas = reservas.stream() 
+            .filter(r -> r.getVehiculo().getPlaca().equals(placaVehiculo)
+                      && r.getEstado() == EstadoReserva.ACTIVA)
+            .count();
+        int ocupados = v.getPasajerosActuales() + (int) reservasActivas;
+        if (ocupados >= v.getCapacidadMaxima()) {
+            System.out.println("⚠ No hay cupos disponibles para este vehículo.");
+            return false;
         }
 
-        
-        boolean existe = reservaDAO.listar().stream()
-                .anyMatch(r -> r.getPasajero().equals(pasajero)
-                        && r.getFechaViaje().equals(fechaViaje)
-                        && r.getEstado().equals("PENDIENTE"));
-
+        // Validar reserva duplicada
+        boolean existe = reservas.stream()
+            .anyMatch(r -> r.getPasajero().getCedula().equals(cedulaPasajero)
+                       && r.getVehiculo().getPlaca().equals(placaVehiculo)
+                       && r.getFechaViaje().equals(fechaViaje)
+                       && r.getEstado() == EstadoReserva.ACTIVA);
         if (existe) {
-            System.out.println("El pasajero ya tiene una reserva activa para ese día.");
-            return null;
+            System.out.println("⚠ El pasajero ya tiene una reserva activa para ese vehículo en esa fecha.");
+            return false;
         }
 
-        Reserva reserva = new Reserva(
-                UUID.randomUUID().toString(),
-                pasajero,
-                vehiculo,
-                fechaViaje
-        );
-
-        
-        reserva.setFechaCreacion(LocalDateTime.now());
-
-        reservaDAO.guardar(reserva);
-
-        return reserva;
+        String codigo = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        Reserva r = new Reserva(codigo, p, v, fechaViaje);
+        reservas.add(r);
+        dao.guardar(r);
+        System.out.println("✔ Reserva creada. Código: " + codigo);
+        return true;
     }
 
-    
-    public void cancelarReserva(String idReserva) {
-        Reserva reserva = reservaDAO.buscarPorId(idReserva);
-
-        if (reserva != null && reserva.getEstado().equals("PENDIENTE")) {
-            reserva.cancelar();
-            System.out.println("Reserva cancelada correctamente.");
-        } else {
-            System.out.println("No se pudo cancelar la reserva.");
-        }
-    }
-
-    
-    public void convertirEnTicket(String idReserva) {
-        Reserva reserva = reservaDAO.buscarPorId(idReserva);
-
-        if (reserva != null && reserva.getEstado().equals("PENDIENTE")) {
-
-            reserva.confirmar();
-
-            
-            ticketService.venderTicket(
-                    reserva.getPasajero(),
-                    reserva.getVehiculo(),
-                    reserva.getFechaViaje()
-            );
-
-            System.out.println("Reserva convertida en ticket.");
-        } else {
-            System.out.println("No se puede convertir la reserva.");
-        }
-    }
-
-    
-    public void verificarVencidas() {
-
-        List<Reserva> reservas = reservaDAO.listar();
-
+    public boolean cancelarReserva(String codigo) {
         for (Reserva r : reservas) {
-            if (r.getEstado().equals("PENDIENTE")) {
+            if (r.getCodigo().equals(codigo) && r.getEstado() == EstadoReserva.ACTIVA) {
+                r.setEstado(EstadoReserva.CANCELADA);
+                dao.guardarTodos(reservas);
+                System.out.println("✔ Reserva cancelada.");
+                return true;
+            }
+        }
+        System.out.println("⚠ Reserva no encontrada o ya no está activa.");
+        return false;
+    }
 
-                Duration tiempo = Duration.between(r.getFechaCreacion(), LocalDateTime.now());
-
-                if (tiempo.toHours() >= 24) {
-                    r.cancelar();
-                    System.out.println("Reserva vencida cancelada: " + r.getIdReserva());
+    public boolean convertirEnTicket(String codigo) {
+        for (Reserva r : reservas) {
+            if (r.getCodigo().equals(codigo) && r.getEstado() == EstadoReserva.ACTIVA) {
+                boolean vendido = ticketService.venderTicket(
+                    r.getPasajero().getCedula(),
+                    r.getVehiculo().getPlaca(),
+                    r.getVehiculo().getRuta(),
+                    r.getFechaViaje().toString()
+                );
+                if (vendido) {
+                    r.setEstado(EstadoReserva.CONVERTIDA);
+                    dao.guardarTodos(reservas);
+                    System.out.println("✔ Reserva convertida en ticket.");
+                    return true;
                 }
             }
         }
+        System.out.println("⚠ No se pudo convertir la reserva.");
+        return false;
     }
 
-    
+    public int verificarVencidas() {
+        int canceladas = 0;
+        for (Reserva r : reservas) {
+            if (r.estaVencida()) {
+                r.setEstado(EstadoReserva.CANCELADA);
+                canceladas++;
+            }
+        }
+        if (canceladas > 0) dao.guardarTodos(reservas);
+        return canceladas;
+    }
+
     public List<Reserva> listarActivas() {
-        return reservaDAO.listar().stream()
-                .filter(r -> r.getEstado().equals("PENDIENTE"))
-                .collect(Collectors.toList());
+        return reservas.stream()
+            .filter(r -> r.getEstado() == EstadoReserva.ACTIVA)
+            .collect(Collectors.toList());
     }
 
-    
-    public List<Reserva> historialPasajero(Pasajero pasajero) {
-        return reservaDAO.listar().stream()
-                .filter(r -> r.getPasajero().equals(pasajero))
-                .collect(Collectors.toList());
+    public List<Reserva> historialPasajero(String cedula) {
+        return reservas.stream()
+            .filter(r -> r.getPasajero().getCedula().equals(cedula))
+            .collect(Collectors.toList());
     }
-}
+
+    public List<Reserva> listarReservas() { return reservas; }
 }
