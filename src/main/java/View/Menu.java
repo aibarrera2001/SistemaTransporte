@@ -15,11 +15,13 @@ public class Menu {
     private final VehiculoService vs;
     private final PersonaService  ps;
     private final TicketService   ts;
-
+    private final ReservaService  rs;
+    
     public Menu() {
-        this.vs = new VehiculoService();
+        this.vs = new VehiculoService();git checkout feature/reservas-view
         this.ps = new PersonaService();
         this.ts = new TicketService(vs, ps);
+        this.rs = new ReservaService(vs, ps, ts);
     }
 
     public void iniciar() {
@@ -34,6 +36,7 @@ public class Menu {
                 case 4: menuTickets();      break;
                 case 5: menuEstadisticas(); break;
                 case 6: menuReportes();     break;
+                case 7: menuReservas();     break;
                 case 0: System.out.println("\n👋 Saliendo del sistema TransCesar..."); break;
                 default: System.out.println("⚠ Opción no válida.");
             }
@@ -50,6 +53,7 @@ public class Menu {
         System.out.println("║  4. Venta de Tickets                     ║");
         System.out.println("║  5. Consultas y Estadísticas             ║");
         System.out.println("║  6. Reportes                             ║");
+        System.out.println("║  7. Reservas                             ║");
         System.out.println("║  0. Salir                                ║");
         System.out.println("╚══════════════════════════════════════════╝");
     }
@@ -309,7 +313,73 @@ private void reporteDelDia() {
     System.out.printf( "║  Tickets vendidos hoy : %-17d║%n", total);
     System.out.printf( "║  Total recaudado hoy  : $%-16d║%n", (int) recaudado);
     System.out.println("╚══════════════════════════════════════════╝");
-}
     
+}
+  // ── menu para RESERVAS ──────────────────────────────────────────────
+private void menuReservas() {
+    int op;
+    do {
+        System.out.println("\n── Reservas ──────────────────────────────");
+        System.out.println("  1. Crear reserva");
+        System.out.println("  2. Cancelar reserva");
+        System.out.println("  3. Listar reservas activas");
+        System.out.println("  4. Historial de pasajero");
+        System.out.println("  5. Convertir reserva en ticket");
+        System.out.println("  6. Verificar reservas vencidas");
+        System.out.println("  0. Volver");
+        op = leerEntero("Opción: ");
+        switch (op) {
+            case 1: crearReserva();           break;
+            case 2: cancelarReserva();        break;
+            case 3: listarReservasActivas();  break;
+            case 4: historialPasajero();      break;
+            case 5: convertirReserva();       break;
+            case 6: verificarVencidas();      break;
+        }
+    } while (op != 0);
+}
+
+private void crearReserva() {
+    System.out.print("Cédula del pasajero : "); String cedula = sc.nextLine().trim();
+    System.out.print("Placa del vehículo  : "); String placa  = sc.nextLine().trim().toUpperCase();
+    System.out.print("Fecha del viaje (YYYY-MM-DD): "); String fechaStr = sc.nextLine().trim();
+    try {
+        java.time.LocalDate fecha = java.time.LocalDate.parse(fechaStr);
+        rs.crearReserva(cedula, placa, fecha);
+    } catch (Exception e) {
+        System.out.println("⚠ Fecha inválida.");
+    }
+}
+
+private void cancelarReserva() {
+    System.out.print("Código de la reserva: "); String codigo = sc.nextLine().trim();
+    rs.cancelarReserva(codigo);
+}
+
+private void listarReservasActivas() {
+    if (rs.listarActivas().isEmpty()) {
+        System.out.println("No hay reservas activas."); return;
+    }
+    for (Reserva r : rs.listarActivas()) r.imprimirDetalle();
+}
+
+private void historialPasajero() {
+    System.out.print("Cédula del pasajero: "); String cedula = sc.nextLine().trim();
+    java.util.List<Reserva> historial = rs.historialPasajero(cedula);
+    if (historial.isEmpty()) {
+        System.out.println("No hay reservas para ese pasajero."); return;
+    }
+    for (Reserva r : historial) r.imprimirDetalle();
+}
+
+private void convertirReserva() {
+    System.out.print("Código de la reserva: "); String codigo = sc.nextLine().trim();
+    rs.convertirEnTicket(codigo);
+}
+
+private void verificarVencidas() {
+    int canceladas = rs.verificarVencidas();
+    System.out.println("✔ Reservas vencidas canceladas: " + canceladas);
+}  
  
 }
