@@ -84,24 +84,24 @@ public class TicketServicio {
 
     private TicketDAO ticketDAO = new TicketDAO();
 
-    // Simulación de tickets en memoria (puedes luego cargar desde archivo)
+    
     private List<Ticket> tickets = new ArrayList<>();
 
-    // 📅 Lista de festivos (ejemplo Colombia)
+    
     private static final Set<LocalDate> FESTIVOS = Set.of(
-            LocalDate.of(2026, 1, 1),   // Año nuevo
-            LocalDate.of(2026, 5, 1),   // Día del trabajo
-            LocalDate.of(2026, 7, 20),  // Independencia
-            LocalDate.of(2026, 8, 7),   // Batalla de Boyacá
-            LocalDate.of(2026, 12, 8),  // Inmaculada
-            LocalDate.of(2026, 12, 25)  // Navidad
+            LocalDate.of(2026, 1, 1),   
+            LocalDate.of(2026, 5, 1),   
+            LocalDate.of(2026, 7, 20),  
+            LocalDate.of(2026, 8, 7),   
+            LocalDate.of(2026, 12, 8),  
+            LocalDate.of(2026, 12, 25)  
     );
 
     public void venderTicket(Pasajero pasajero, Vehiculo vehiculo, String origen, String destino) {
 
         LocalDate hoy = LocalDate.now();
 
-        // 🔴 VALIDACIÓN 1: máximo 3 tickets por día
+        
         long cantidadHoy = tickets.stream()
                 .filter(t -> t.getPasajero().getCedula().equals(pasajero.getCedula())
                         && t.getFecha().equals(hoy))
@@ -112,33 +112,33 @@ public class TicketServicio {
             return;
         }
 
-        // 🔴 VALIDACIÓN 2: cupos del vehículo
+        
         if (!vehiculo.hayCupos()) {
             System.out.println("❌ No hay cupos disponibles");
             return;
         }
 
-        // 💰 Crear ticket
+        
         Ticket ticket = new Ticket(pasajero, vehiculo, origen, destino);
 
         double total = ticket.calcularTotal();
 
-        // 🟡 REGLA: aumento del 20% si es festivo
+        
         if (FESTIVOS.contains(hoy)) {
             total *= 1.20;
             System.out.println("⚠️ Día festivo: se aplica recargo del 20%");
         }
 
-        // ocupar cupo
+        
         vehiculo.ocuparCupo();
 
-        // guardar en memoria
+        
         tickets.add(ticket);
 
-        // persistencia
+        
         ticketDAO.guardar(ticket);
 
-        // salida
+       
         System.out.println("✅ Ticket vendido correctamente");
         System.out.println("Total a pagar: $" + total);
         ticket.imprimirDetalle();
