@@ -4,6 +4,7 @@
  */
 package com.mycompany.sistematransporte;
 
+import java.time.LocalDate;
 /**
  *
  * @author jose
@@ -116,6 +117,49 @@ public class PasajeroRegular extends Pasajero {
     @Override
     public void imprimirDetalle() {
         System.out.println("Regular: " + nombre);
+    }
+}
+
+
+
+public class Ticket implements Calculable, Imprimible {
+
+    private Pasajero pasajero;
+    private Vehiculo vehiculo;
+    private LocalDate fecha;
+    private String origen;
+    private String destino;
+
+    public Ticket(Pasajero pasajero, Vehiculo vehiculo, String origen, String destino) {
+        this.pasajero = pasajero;
+        this.vehiculo = vehiculo;
+        this.fecha = LocalDate.now();
+        this.origen = origen;
+        this.destino = destino;
+    }
+
+    public Pasajero getPasajero() {
+        return pasajero;
+    }
+
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
+
+    @Override
+    public double calcularTotal() {
+        double base = vehiculo.getTarifaBase();
+        double descuento = pasajero.calcularDescuento();
+        return base - (base * descuento);
+    }
+
+    @Override
+    public void imprimirDetalle() {
+        System.out.println("----- TICKET -----");
+        System.out.println("Pasajero: " + pasajero.getNombre());
+        System.out.println("Origen: " + origen);
+        System.out.println("Destino: " + destino);
+        System.out.println("Valor final: $" + calcularTotal());
     }
 }
 }
