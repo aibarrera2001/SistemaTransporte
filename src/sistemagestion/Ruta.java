@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 
  * Representa una ruta del sistema.
  * Almacena rutas registradas en memoria para asignarlas a vehículos.
  */
