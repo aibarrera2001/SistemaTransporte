@@ -49,4 +49,14 @@ public class Reserva implements Imprimible {
 
     public void setEstado(EstadoReserva estado) { this.estado = estado; }
     public void setFechaCreacion(LocalDate f)   { this.fechaCreacion = f; }
+    
+private LocalDateTime fechaCreacion;
+
+public LocalDateTime getFechaCreacion() {
+    return fechaCreacion;
+}
+
+public void setFechaCreacion(LocalDateTime fechaCreacion) {
+    this.fechaCreacion = fechaCreacion;
+}
 }
