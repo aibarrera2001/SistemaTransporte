@@ -101,4 +101,21 @@ public class PasajeroAdultoMayor extends Pasajero {
         System.out.println("Adulto Mayor: " + nombre);
     }
 }
+
+public class PasajeroRegular extends Pasajero {
+
+    public PasajeroRegular(String cedula, String nombre) {
+        super(cedula, nombre);
+    }
+
+    @Override
+    public double calcularDescuento() {
+        return 0.0;
+    }
+
+    @Override
+    public void imprimirDetalle() {
+        System.out.println("Regular: " + nombre);
+    }
+}
 }
